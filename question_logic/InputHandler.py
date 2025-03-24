@@ -6,7 +6,7 @@ class UserInputHandler: #Handles all user inputs
             "Subject":"",
             "ExamBoard":"",
             "Topic":"",
-            "Question": '10',
+            "Amount": '10',
         }
 
     def TakeUserInputs(self):
@@ -15,10 +15,10 @@ class UserInputHandler: #Handles all user inputs
         self.AiInputs["Subject"] = input("What is the subject? : ")
         self.AiInputs["ExamBoard"] = input("What is the Exam Board? : ")
         self.AiInputs["Topic"] = input("What is the Topic? : ")
-        self.AiInputs["Question"] = input("How many questions?")
+        self.AiInputs["Amount"] = input("How many questions?")
 
-        if self.AiInputs["Question"] == "":
-            self.AiInputs["Question"] = "10"
+        if self.AiInputs["Amount"] == "":
+            self.AiInputs["Amount"] = "10"
 
     def ReturnInputs(self):
         return self.AiInputs
