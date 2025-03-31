@@ -1,66 +1,84 @@
 import sqlite3
 
+TestData = { #Set Default State for AiInputs
+            "Qualification":"Alevel",
+            "Subject":"Business",
+            "ExamBoard":"Eduqas",
+            "Topic":"Motivational Theories",
+            "Amount": '3',
+        }
+TestQuestions = """ 
+What are Maslow's hierarchy of needs?  
+Maslow's hierarchy includes five levels: physiological, safety, love/belonging, esteem, and self-actualization.
 
-connection = sqlite3.connect('database.db')
-cursor = connection.cursor()
+Explain Herzberg's two-factor theory.  
+Herzberg's theory divides factors into hygiene (dissatisfaction) and motivators (satisfaction).
 
-# Set Default State for AiInputs
-Data = {
-    "Qualification": "Alevel",
-    "Subject": "Maths",
-    "ExamBoard": "AQA",
-    "Topic": "Quadratics",
-    "Amount": "1",
-}
-
-questions = """
-1. 'What do the 4P's of marketing stand for?', 'Product, Price, Place, Promotion'
-2. 'What is Maths?' , 'To do stuff'"""
+What is the significance of McGregor's Theory X and Theory Y?  
+Theory X assumes employees are lazy, while Theory Y believes they are self-motivated. """
 
 
-def PrepareData(Data,Questions):
-    #Split The dictionary into Each part
-    Qualification = Data['Qualification']
-    Subject = Data['Subject']
-    ExamBoard = Data['ExamBoard']
-    Topic = Data['Topic']
-    Amount = int(Data['Amount'])
+class DataBaseManager:
 
-    # for x in range(Amount):
-    #     None
+    def __init__(self):
+        self.conn = sqlite3.connect('database.db')
+        self.cursor = self.conn.cursor()
 
-def Add2Table(Data):
-    cursor.execute("""
-    INSERT INTO StudyQuiz (Qualification, Subject, ExamBoard, Topic, Question, Answer)
-    VALUES (?, ?, ?, ?, ?, ?)""",
-    (Data['Qualification'], Data['Subject'], Data['ExamBoard'], Data['Topic'], Data['Question'], Data['Answer']))
-    connection.commit()  # Commit the transaction
+    def Add2Table(self,qualification, subject, examboard, topic, question, answer):
+        self.cursor.execute("""
+        INSERT INTO StudyQuiz (Qualification, Subject, ExamBoard, Topic, Question, Answer)
+        VALUES (?, ?, ?, ?, ?, ?)""", [qualification, subject, examboard, topic, question, answer])
+        self.conn.commit()  # Commit the transaction
 
-def CreateTable():
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS StudyQuiz (
-        Qualification TEXT,
-        Subject TEXT,
-        ExamBoard TEXT,
-        Topic TEXT,
-        Question TEXT,
-        Answer TEXT,
-        PRIMARY KEY (Qualification, Subject, ExamBoard, Topic, Question)
-    )""")
 
-def CheckExist():
-    table_name = 'StudyQuiz'
-    cursor.execute("""
-        SELECT name
-        FROM sqlite_master
-        WHERE type='table'
-        AND name=?;
-    """, (table_name,))
-    result = cursor.fetchone()
-    return result is not None
+    def PrepareData(self,Data, questions):
+        # Split The dictionary into Each part
+        Qualification = Data['Qualification']  # Sets values for 99% of database
+        Subject = Data['Subject']
+        ExamBoard = Data['ExamBoard']
+        Topic = Data['Topic']
+        Amount = int(Data['Amount'])
+
+        lines = questions.split('\n')  # Sorts questions to be inputted
+        cleaned = [line for line in lines if line.strip()]
+        print(cleaned)
+
+        cleaned3DList = []
+
+        for x in range(Amount*2):
+            
+
+
+
+    def CreateTable(self):
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS StudyQuiz (
+            Qualification TEXT,
+            Subject TEXT,
+            ExamBoard TEXT,
+            Topic TEXT,
+            Question TEXT,
+            Answer TEXT,
+            PRIMARY KEY (Qualification, Subject, ExamBoard, Topic, Question)
+        )""")
+
+
+    def CheckExist(self):
+        table_name = 'StudyQuiz'
+        self.cursor.execute("""
+            SELECT name
+            FROM sqlite_master
+            WHERE type='table'
+            AND name=?;
+        """, (table_name,))
+        result = self.cursor.fetchone()
+        return result is not None
+
 
 if __name__ == "__main__":
-    if not CheckExist():
-        CreateTable()
-    Add2Table(Data)
-    connection.close()  # Close the connection
+    db = DataBaseManager()
+
+    if not db.CheckExist():
+        db.CreateTable()
+    db.PrepareData(TestData,TestQuestions)
+
