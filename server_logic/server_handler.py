@@ -11,7 +11,11 @@ class ServerManager:
         self.s.bind((self.host, self.port))
         self.dbm = DatabaseManager()
 
+    def database_insert(self,data):
+        self.dbm.prepare_data_to_add(data)
 
+    def database_retrieve(self,data):
+        self.dbm.retrieve_data(data)
     def server_listen(self):
         print("Server is listening on port", self.port)
         self.s.listen(1)
@@ -20,8 +24,13 @@ class ServerManager:
             print("New Connection from", address)
             data = connection.recv(1024)
             data = data.decode('utf-8')
-            print("Data recieved from user")
-            self.dbm.prepare_data_to_add(data)
+            print("Data received from user")
+            if data.startswith("```json") == True:
+                self.database_insert(data)
+            else:
+                self.database_retrieve(data)
+
+
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 import sqlite3
 import json
-
-
+import base64
 
 class DatabaseManager:
 
@@ -9,6 +8,9 @@ class DatabaseManager:
         self.conn = sqlite3.connect('database.db')
         self.cursor = self.conn.cursor()
 
+    # Main functions
+
+    # Add to table stuff
     def add_2_table(self, formatted_dictionary):
         # Adds data to the table by separating the json dictionary into each part
         qualification = formatted_dictionary["Qualification"].upper()
@@ -44,6 +46,30 @@ class DatabaseManager:
             # Add to the table
             self.add_2_table(formatted_dictionary)
 
+    # Remove from table
+
+    # Retrieve data from database
+
+    # - Take inputs for what subjects / specifications
+    # - Number of questions wanted
+    # - Return appropriate (process it)
+    def retrieve_data(self, query):
+        query = eval(base64.b64decode(query))
+        # {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
+        qualification = query["Qualification"].upper()
+        subject = query["Subject"].upper()
+        examboard = query["ExamBoard"].upper()
+        topic = query["Topic"].upper()
+        amount = query["Amount"]
+
+        self.cursor.execute("""
+                SELECT QuestionID, Question, Answer FROM StudyQuiz
+                WHERE Qualification = qualification AND Subject = subject AND Topic = topic  AND ExamBoard = examboard  """)
+        # Commit the transaction
+        self.conn.commit()
+        output = self. cursor.fetchall()
+        print(output)
+    # Pre Checks for server
     def create_table(self):
         # Creates table in the correct format with questionID as primary key
         self.cursor.execute("""
