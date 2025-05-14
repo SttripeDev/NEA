@@ -15,7 +15,8 @@ class ServerManager:
         self.dbm.prepare_data_to_add(data)
 
     def database_retrieve(self,data):
-        self.dbm.retrieve_data(data)
+        formatted_data = self.dbm.retrieve_data(data)
+        self.s.send(formatted_data.encode())
     def server_listen(self):
         print("Server is listening on port", self.port)
         self.s.listen(1)

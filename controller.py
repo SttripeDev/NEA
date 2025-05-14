@@ -27,6 +27,11 @@ class ServerClient:
         base64_dict = base64.b64encode(encode_query)
 
         self.s.send(base64_dict)
+        formatted_data = self.s.recv(1024)
+        formatted_data = formatted_data.decode('utf-8')
+        print(formatted_data)
+
+
 
 
 class QuizManager:

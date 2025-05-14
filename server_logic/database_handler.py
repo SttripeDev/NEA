@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import base64
-
+import random
 class DatabaseManager:
 
     def __init__(self):  # Initialises connection to the database file & cursor so that I can write to it
@@ -26,7 +26,6 @@ class DatabaseManager:
         VALUES (?, ?, ?, ?, ?, ?)""", [qualification, subject, exam_board, topic, question, answer])
         # Commit the transaction
         self.conn.commit()
-
     def prepare_data_to_add(self, raw_data):
         # Splits the string based on new lines to allow for all questions to be in one list
         raw_list = raw_data.split("\n")
@@ -53,22 +52,54 @@ class DatabaseManager:
     # - Take inputs for what subjects / specifications
     # - Number of questions wanted
     # - Return appropriate (process it)
-    def retrieve_data(self, query):
-        query = eval(base64.b64decode(query))
-        # {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
-        qualification = query["Qualification"].upper()
-        subject = query["Subject"].upper()
-        examboard = query["ExamBoard"].upper()
-        topic = query["Topic"].upper()
-        amount = query["Amount"]
+    def format_retrieved_data(self,data,amount):
 
-        self.cursor.execute("""
+
+
+    # Check ID and random number generate from list (useful for random questions when big set of questions)
+    # check if the requested amount is > than available
+    # return values to client
+        id_list = []
+        for x in range(len(data)):
+            id_list.insert(x,data[x][0])
+        question_list = []
+        for x in range(len(data)):
+            random_question_id = random.choice(id_list)
+            id_list.pop(random_question_id)
+            for y in range(len(data)):
+                if random_question_id == data[y][0]:
+                    question = data[y][1]
+                    answer = data[y][2]
+                    q_and_a = [question,answer]
+                    question_list = question_list.insert[x,q_and_a]
+                else:
+                    continue
+
+
+        return question_list
+
+    #[(10, 'What are the four components of the marketing mix?', 'Product, Price, Place, Promotion'),
+     #(11, "How does 'price' affect consumer purchasing behavior?", 'It influences demand and perceived value.'),
+     #(12, "What role does 'promotion' play in marketing strategies?", 'It increases awareness and drives sales.')]
+
+    def retrieve_data(self, query_input):
+        query_input = eval(base64.b64decode(query_input))
+        # {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
+        qualification = query_input["Qualification"].upper()
+        subject = query_input["Subject"].upper()
+        examboard = query_input["ExamBoard"].upper()
+        topic = query_input["Topic"].upper()
+        amount = query_input["Amount"]
+
+        query = """
                 SELECT QuestionID, Question, Answer FROM StudyQuiz
-                WHERE Qualification = qualification AND Subject = subject AND Topic = topic  AND ExamBoard = examboard  """)
+                WHERE Qualification = ? AND Subject = ? AND Topic = ?  AND ExamBoard = ?  """
         # Commit the transaction
-        self.conn.commit()
-        output = self. cursor.fetchall()
+        self.cursor.execute(query,(qualification,subject,topic,examboard))
+        output = self.cursor.fetchall()
         print(output)
+        formatted = self.format_retrieved_data(output,amount)
+
     # Pre Checks for server
     def create_table(self):
         # Creates table in the correct format with questionID as primary key
@@ -94,3 +125,8 @@ class DatabaseManager:
         """, (table_name,))
         result = self.cursor.fetchone()
         return result is not None
+
+if __name__ == "__main__":
+    query_input = {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
+    M = DatabaseManager()
+    M.retrieve_data(query_input)
