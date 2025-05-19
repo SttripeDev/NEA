@@ -84,7 +84,7 @@ class DatabaseManager:
      #(12, "What role does 'promotion' play in marketing strategies?", 'It increases awareness and drives sales.')]
 
     def retrieve_data(self, query_input):
-        query_input = eval(base64.b64decode(query_input))
+        query_input = json.loads(query_input)
         # {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
         qualification = query_input["Qualification"].upper()
         subject = query_input["Subject"].upper()
@@ -100,10 +100,9 @@ class DatabaseManager:
         output = self.cursor.fetchall()
 
         formatted = self.format_retrieved_data(output,amount)
-        formatted = str(formatted).encode('utf-8')
+        formatted = json.dumps(formatted)
 
-        base64_formatted = base64.b64encode(formatted)
-        return base64_formatted
+        return formatted
 
     # Pre Checks for server
     def create_table(self):
