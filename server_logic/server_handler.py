@@ -16,7 +16,8 @@ class ServerManager:
 
     def database_retrieve(self,data):
         formatted_data = self.dbm.retrieve_data(data)
-        self.s.send(formatted_data.encode())
+        return formatted_data
+
     def server_listen(self):
         print("Server is listening on port", self.port)
         self.s.listen(1)
@@ -29,8 +30,9 @@ class ServerManager:
             if data.startswith("```json") == True:
                 self.database_insert(data)
             else:
-                self.database_retrieve(data)
-
+                result = self.database_retrieve(data)
+                self.s.send(result)
+            self.s.close()
 
 
 

@@ -4,7 +4,7 @@ from question_logic import input_handler as input_handler
 
 import socket
 import base64
-
+import time
 class ServerClient:
     def __init__(self):
         self.host = '127.0.0.1'
@@ -27,8 +27,10 @@ class ServerClient:
         base64_dict = base64.b64encode(encode_query)
 
         self.s.send(base64_dict)
+        time.sleep(5)
         formatted_data = self.s.recv(1024)
         formatted_data = formatted_data.decode('utf-8')
+        formatted_data = base64.b64decode(formatted_data)
         print(formatted_data)
 
 

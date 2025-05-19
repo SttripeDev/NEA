@@ -63,15 +63,16 @@ class DatabaseManager:
         for x in range(len(data)):
             id_list.insert(x,data[x][0])
         question_list = []
+        q_and_a = []
         for x in range(len(data)):
             random_question_id = random.choice(id_list)
-            id_list.pop(random_question_id)
+            id_list.remove(random_question_id)
             for y in range(len(data)):
                 if random_question_id == data[y][0]:
                     question = data[y][1]
                     answer = data[y][2]
                     q_and_a = [question,answer]
-                    question_list = question_list.insert[x,q_and_a]
+                    question_list.insert(x, q_and_a)
                 else:
                     continue
 
@@ -97,8 +98,12 @@ class DatabaseManager:
         # Commit the transaction
         self.cursor.execute(query,(qualification,subject,topic,examboard))
         output = self.cursor.fetchall()
-        print(output)
+
         formatted = self.format_retrieved_data(output,amount)
+        formatted = str(formatted).encode('utf-8')
+
+        base64_formatted = base64.b64encode(formatted)
+        return base64_formatted
 
     # Pre Checks for server
     def create_table(self):
