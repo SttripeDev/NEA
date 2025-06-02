@@ -1,74 +1,37 @@
 import math
 
+def cosine_calculation(string1 , string2):
+    # Convert strings to lowercase ASCII arrays
+    ascii_array1 = [ord(char) for char in string1.lower()]
+    ascii_array2 = [ord(char) for char in string2.lower()]
 
-string1 = "Hello My Name is John"
-string2 = "Hello My Name is Bob"
+    # Extend shorter array with zeros to match length
+    if len(ascii_array1) < len(ascii_array2):
+        ascii_array1.extend([0] * (len(ascii_array2) - len(ascii_array1)))
+    elif len(ascii_array2) < len(ascii_array1):
+        ascii_array2.extend([0] * (len(ascii_array1) - len(ascii_array2)))
 
+    # Calculate numerator (dot product)
+    numerator = 0
+    for x in range(len(ascii_array1)):
+        numerator += ascii_array1[x] * ascii_array2[x]
 
-class CosineSimilarity:
+    # Calculate magnitudes
+    mag1 = 0
+    for x in range(len(ascii_array1)):
+        mag1 += ascii_array1[x] ** 2
 
-    def __init__(self):
-        self.extended = False
-        self.numerator_total = 0
-        self.denominator_total = 0
-        self.ascii_array1 = []
-        self.ascii_array2 = []
+    mag2 = 0
+    for x in range(len(ascii_array2)):
+        mag2 += ascii_array2[x] ** 2
 
-#Intital Steps
-    def string_2_ascii_array(self, string):
+    # Calculate denominator
+    denominator = math.sqrt(mag1) * math.sqrt(mag2)
 
-        string = string.lower()
-        ascii_string = [ord(char) for char in string]
+    # Calculate cosine similarity
+    if denominator == 0:
+        similarity = 0
+    else:
+        similarity = numerator / denominator
 
-        return ascii_string
-
-    def extender(self, ascii_array1, ascii_array2):
-
-        if len(ascii_array2) > len(ascii_array1):
-            amount = len(ascii_array2) - len(ascii_array1)
-            for x in range(amount):
-                ascii_array1.append(0)
-            self.extended = True
-        elif len(ascii_array1) > len(ascii_array2):
-            amount = len(ascii_array1) - len(ascii_array2)
-            for x in range(amount):
-                ascii_array2.append(0)
-            self.extended = True
-        else:
-            self.extended = False
-
-    def numerator_calc(self,ascii_array1,ascii_array2):
-
-        for x in range(len(ascii_array2)):
-            self.numerator_total = self.numerator_total + (ascii_array1[x] * ascii_array2[x])
-
-
-
-    def magnitude(self,ascii_array):
-
-        mag = None
-        for x in range(len(ascii_array)):
-            mag = mag + (ascii_array[x] ** 2)
-        return mag
-
-    def denominator_calc(self,magnitude_array1 ,magnitude_array2):
-
-        denominator = math.sqrt(magnitude_array1) * math.sqrt(magnitude_array2)
-
-
-    def run(self,string1,string2):
-        self.ascii_array1 = CosineSimilarity.string_2_ascii_array(string1)
-        self.ascii_array2 = CosineSimilarity.string_2_ascii_array(string1)
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print(f"Cosine similarity: {similarity}")
