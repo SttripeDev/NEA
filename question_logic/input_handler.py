@@ -1,6 +1,6 @@
-class UserInputHandler:  # Handles all user inputs
+class UserInputHandler:
     def __init__(self):
-        self.ai_input_format = {  # Set Default State for AiInputs
+        self.ai_input_format = {
             "Qualification": "",
             "Subject": "",
             "ExamBoard": "",
@@ -9,7 +9,7 @@ class UserInputHandler:  # Handles all user inputs
         }
 
     def take_user_input(self):
-        # Appends them to user specification
+
         self.ai_input_format["Qualification"] = input("WHat is the Qualification? : ")
         self.ai_input_format["Subject"] = input("What is the subject? : ")
         self.ai_input_format["ExamBoard"] = input("What is the Exam Board? : ")
@@ -19,5 +19,5 @@ class UserInputHandler:  # Handles all user inputs
         if self.ai_input_format["Amount"] == "":
             self.ai_input_format["Amount"] = "10"
 
-    def return_input(self):  # Returns the value to controller script
+    def return_input(self):
         return self.ai_input_format

@@ -4,18 +4,17 @@ import os
 from dotenv import load_dotenv
 
 
-class QuestionGeneration:  # Generates all questions
-    def __init__(self):  # Initialises the value of user_input , as well as fetching api from .env file
+class QuestionGeneration:
+    def __init__(self):
         self.user_input = None
         load_dotenv()
         self.client = OpenAI(api_key=os.getenv("MY_KEY"))
 
     def generator(self, user_inputs):
-        # Sets the dictionary form of user_inputs to a string.
+
         self.user_input = str(user_inputs)
 
-        # ChatGPT AI question generation. user inputs sent through the role of user and a predetermined system instruction is also stated
-        # This is then returned to the control file.
+
         completion = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
