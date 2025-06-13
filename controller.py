@@ -1,11 +1,24 @@
-# imports all the classes from the other scripts into one controller file
+
 from question_logic import question_generator as question_gen
 from question_logic import input_handler as input_handler
 
 import socket
 import json
+
+
 class ServerClient:
+    """
+    Name: ServerClient
+    Purpose: Connect to Database server and handle processes such as insertion and retrieval
+    """
+
     def __init__(self):
+        """ Name: __init__
+        Parameters: host: string, port:integer , s:socket
+        Returns: None
+        Purpose: Constructor to set the initial values of the connection details
+        """
+
         self.host = '127.0.0.1'
         self.port = 51000
         self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -13,12 +26,24 @@ class ServerClient:
 
     def database_insertion(self,raw_data):
 
+        """
+        Name: database_insertion
+        Parameters: raw_data: array, s:socket
+        Returns: None
+        Purpose: sends raw_data to the database server
+        """
+
         self.s.connect((self.host, self.port))
 
         self.s.send(raw_data.encode())
 
     def database_retrieval(self,query):
-
+        """
+        Name: database_retrieval
+        Parameters: query: array, s:socket , encode_query:json array
+        Returns: formatted_data:array
+        Purpose: sends request data from server with query and returns that back to user as formatted_data
+        """
         self.s.connect((self.host, self.port))
 
         encode_query = json.dumps(query)
