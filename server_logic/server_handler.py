@@ -1,46 +1,72 @@
-#Import required libraries
 import sqlite3
 import json
 import socket
 
 from database_handler import DatabaseManager
 class ServerManager:
-
-    def __init__(self): #Initialise required server details
+    """
+    Name: ServerManager
+    Purpose: Controls all server purposes, accepting connections , sending requests to the database and sending and recieving data from the client.
+    """
+    def __init__(self):
+        """
+        Name: __init__
+        Parameters: self.host:string, self.port:51000 , self.s: socket.socket , self.dbm:function
+        Returns: None
+        Purpose: Constructor that sets the initial value of required variables
+        """
         self.host = "127.0.0.1"
         self.port = 51000
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.host, self.port))
         self.dbm = DatabaseManager()
 
-    def database_insert(self,data): #Calls dbm to add data to database.db
+    def database_insert(self,data):
+        """
+        Name: database_insert
+        Parameters: data:array
+        Returns: None
+        Purpose: Send the data to the database for insertion
+        """
         self.dbm.prepare_data_to_add(data)
 
-    def database_retrieve(self,data): #Calls dbm to retrieve data from database.db
+    def database_retrieve(self,data):
+        """
+        Name: database_retrieve
+        Parameters: data:array, formatted_data:array
+        Returns: formatted_data
+        Purpose: sends the data for a request of specific database entries
+        """
         formatted_data = self.dbm.retrieve_data(data)
         return formatted_data
 
-    def server_listen(self): #Listens for connections
+    def server_listen(self):
+        """
+        Name: server_listen
+        Parameters: data:json
+        Returns: formatted_data
+        Purpose: Waits for a user connection and based on the data provided determines if data needs to be sent for insertion or for retrieval
+        """
         print("Server is listening on port", self.port)
         self.s.listen(1)
-        while True: #Loops until connections
+        while True:
             connection, address = self.s.accept()
             print("New Connection from", address)
             data = connection.recv(1024)
             data = data.decode('utf-8')
             print("Data received from user")
-            if data.startswith("```json") == True: #Checks based on input format if it is adding or retrieving
+            if data.startswith("```json") == True:
                 self.database_insert(data)
             else:
                 result = self.database_retrieve(data)
                 connection.send(result.encode())
-            connection.close() #Closes client connection once tasks are complete
+            connection.close()
 
 
 
 if __name__ == "__main__":
-    db = DatabaseManager() #Initialises connection to dbm
+    db = DatabaseManager()
     svr = ServerManager()
-    if not db.check_exist(): #Checks before server comes online
+    if not db.check_exist():
         db.create_table()
-    svr.server_listen() #Starts server
+    svr.server_listen()

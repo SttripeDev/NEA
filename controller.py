@@ -13,7 +13,8 @@ class ServerClient:
     """
 
     def __init__(self):
-        """ Name: __init__
+        """
+        Name: __init__
         Parameters: host: string, port:integer , s:socket
         Returns: None
         Purpose: Constructor to set the initial values of the connection details
@@ -58,9 +59,17 @@ class ServerClient:
 
 
 class QuizManager:
-
+    """
+        Name: QuizManager
+        Purpose: Manages user inputs and the movement of data
+    """
     def __init__(self):
-        # Initialises values for raw_data, user_inputs as well as defining user_input_handler , question_generation , database_manager
+        """
+            Name: __init__
+            Parameters: user_input_handler:function, question_generation:function , raw_data:string , user_inputs:string
+            Returns: None
+            Purpose: Constructor that sets the initial value of required variables
+        """
         self.user_input_handler = input_handler.UserInputHandler()
         self.question_generation = question_gen.QuestionGeneration()
 
@@ -68,7 +77,12 @@ class QuizManager:
         self.user_inputs = None
 
     def question_controller(self):
-        # Controls the movement of data from user input to generation to sending to database
+        """
+            Name: question_controller
+            Parameters: self.user_input_handler:function, self.user_inputs:array, self.raw_data: array , svr_manager: function
+            Returns: self.raw_data
+            Purpose: takes user input , sends to have questions created , sends that to database server
+        """
         self.user_input_handler.take_user_input()
 
         self.user_inputs = self.user_input_handler.return_input()
@@ -78,8 +92,12 @@ class QuizManager:
         svr_manager.database_insertion(self.raw_data)
 
     def retrieval_controller(self):
-
-        #Takes inputs
+        """
+            Name: retrieval_controller
+            Parameters:self.user_input_handler:function, self.user_inputs:array, svr_manager:function
+            Returns: self.user_inputs
+            Purpose: takes user input , sends the data to database to be processed to recieve specified data.
+        """
 
         self.user_input_handler.take_user_input()
         self.user_inputs = self.user_input_handler.return_input()

@@ -1,18 +1,34 @@
-import sqlite3
 import json
-import base64
 import random
-class DatabaseManager:
+import sqlite3
 
-    def __init__(self):  # Initialises connection to the database file & cursor so that I can write to it
+
+class DatabaseManager:
+    """
+    Name: DatabaseManager
+    Purpose: Controls the flow in and out of the database
+    """
+
+    def __init__(self):
+        """
+        Name: __init__
+        Parameters: self.conn: sqlite3.connect, self.cursor:cursor ,
+        Returns: None
+        Purpose: Constructor to set the initial values of the connection location and cursor
+        """
         self.conn = sqlite3.connect('database.db')
         self.cursor = self.conn.cursor()
 
-    # Main functions
 
-    # Add to table stuff
+
+
     def add_2_table(self, formatted_dictionary):
-        # Adds data to the table by separating the json dictionary into each part
+        """
+        Name: add_2_table
+        Parameters: formatted_dictionary:dictionary, qualification:string, subject:string, exam_board:string, topic:string,question:string,answer:string
+        Returns: None
+        Purpose: seperates the dictionary into individual strings then commits them to database.
+        """
         qualification = formatted_dictionary["Qualification"].upper()
         subject = formatted_dictionary["Subject"].upper()
         exam_board = formatted_dictionary["ExamBoard"].upper()
@@ -20,45 +36,38 @@ class DatabaseManager:
         question = formatted_dictionary["Question"]
         answer = formatted_dictionary["Answer"]
 
-        # Inputted into database by use of SQL
         self.cursor.execute("""
         INSERT INTO StudyQuiz (Qualification, Subject, ExamBoard, Topic, Question, Answer)
         VALUES (?, ?, ?, ?, ?, ?)""", [qualification, subject, exam_board, topic, question, answer])
-        # Commit the transaction
+
         self.conn.commit()
     def prepare_data_to_add(self, raw_data):
-        # Splits the string based on new lines to allow for all questions to be in one list
+        """
+        Name: preparte_data_to_add
+        Parameters: raw_data:array , filtered_raw_list:array
+        Returns: None
+        Purpose: filters the list of unrequired characters , then loops through list to make it a dictionary to send to add_2_table
+        """
         raw_list = raw_data.split("\n")
 
-        # Remove unwanted details in the list
         filtered_raw_list = [item for item in raw_list if item not in ("```", "", "json", "```json")]
-
-        # Loops the length of the list to filter remaining attributes
 
         for x in range(len(filtered_raw_list)):
             data = filtered_raw_list[x]
             raw_dictionary = data.split(' = ')[1]
 
-            # Convert the list to a dictionary
             formatted_dictionary = json.loads(raw_dictionary)
 
-            # Add to the table
             self.add_2_table(formatted_dictionary)
 
-    # Remove from table
-
-    # Retrieve data from database
-
-    # - Take inputs for what subjects / specifications
-    # - Number of questions wanted
-    # - Return appropriate (process it)
     def format_retrieved_data(self,data,amount):
+        """
+        Name: format_retrieved_data
+        Parameters: data:array, amount:integer
+        Returns: None
+        Purpose: format the data from retrieval to return to client .
+        """
 
-
-
-    # Check ID and random number generate from list (useful for random questions when big set of questions)
-    # check if the requested amount is > than available
-    # return values to client
         id_list = []
         for x in range(len(data)):
             id_list.insert(x,data[x][0])
@@ -76,16 +85,16 @@ class DatabaseManager:
                 else:
                     continue
 
-
         return question_list
 
-    #[(10, 'What are the four components of the marketing mix?', 'Product, Price, Place, Promotion'),
-     #(11, "How does 'price' affect consumer purchasing behavior?", 'It influences demand and perceived value.'),
-     #(12, "What role does 'promotion' play in marketing strategies?", 'It increases awareness and drives sales.')]
-
     def retrieve_data(self, query_input):
+        """
+        Name: retrieved_data
+        Parameters: query_input: array
+        Returns: formatted
+        Purpose: decodes the data and seperated it into seperate variables to send a database request.
+        """
         query_input = json.loads(query_input)
-        # {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
         qualification = query_input["Qualification"].upper()
         subject = query_input["Subject"].upper()
         examboard = query_input["ExamBoard"].upper()
@@ -95,7 +104,7 @@ class DatabaseManager:
         query = """
                 SELECT QuestionID, Question, Answer FROM StudyQuiz
                 WHERE Qualification = ? AND Subject = ? AND Topic = ?  AND ExamBoard = ?  """
-        # Commit the transaction
+
         self.cursor.execute(query,(qualification,subject,topic,examboard))
         output = self.cursor.fetchall()
 
@@ -104,9 +113,14 @@ class DatabaseManager:
 
         return formatted
 
-    # Pre Checks for server
+
     def create_table(self):
-        # Creates table in the correct format with questionID as primary key
+        """
+        Name: create_table
+        Parameters: self.cursor:sqlite3.cursor
+        Returns: None
+        Purpose: Creates the StudyQuiz Table
+        """
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS StudyQuiz (
             QuestionID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,7 +133,12 @@ class DatabaseManager:
         )""")
 
     def check_exist(self):
-        # A method of ensuring the table does exist.
+        """
+        Name: check_exist
+        Parameters: table_name:string
+        Returns: results
+        Purpose: Checks it 'StudyQuiz' exists
+        """
         table_name = 'StudyQuiz'
         self.cursor.execute("""
             SELECT name
