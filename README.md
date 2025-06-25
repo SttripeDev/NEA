@@ -14,6 +14,7 @@ Code and project for my computer Science NEA . Currently a WIP current working f
 - Communication between files
 - Main Menu & Settings menu for GUI
 - Comments for functions and files
+- Format of how the program screen are going to work
 
 #
-Updated as of 23/06/2025
+Updated as of 25/06/2025
