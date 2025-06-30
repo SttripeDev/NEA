@@ -132,6 +132,18 @@ class DatabaseManager:
             Answer TEXT
         )""")
 
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ExamBoard (
+            BoardID INTEGER PRIMARY KEY AUTOINCREMENT ,
+            BoardName TEXT)""")
+
+    # def add_prerequisites(self):
+    #     examBoard = ["AQA","EDEXCEL","EDUQAS","OCR"]
+    #     self.cursor.execute("""
+    #             INSERT INTO ExamBoard ()
+    #             VALUES (?)""", )
+    #
+    #     self.conn.commit()
     def check_exist(self):
         """
         Name: check_exist
@@ -149,7 +161,9 @@ class DatabaseManager:
         result = self.cursor.fetchone()
         return result is not None
 
+
+
 if __name__ == "__main__":
-    query_input = {'Qualification': 'Alevel', 'Subject': 'Business', 'ExamBoard': 'Edexcel', 'Topic': "4P's", 'Amount': '4'}
-    M = DatabaseManager()
-    M.retrieve_data(query_input)
+    db = DatabaseManager()
+    if not db.check_exist():
+        db.create_table()

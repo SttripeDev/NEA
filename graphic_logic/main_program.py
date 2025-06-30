@@ -193,63 +193,104 @@ class StudyQuiz(Tk.CTk):
         self.existing_set_button.place_forget()
         self.settings_button.place_forget()
         if choice == 1:
-            question_creation_screen
-        elif choice ==2:
-            None
+            self.selection_screen()
 
-
-class QuestionCreationScreen:
-
-    def __init__(self):
-        super().__init__()
-
-
-
-    def selection_screen(self,choice):
-        # Check whether coming from "Create New Questions"
-        # Box for qualification
-        # Box for Subject
-        # Box for ExamBoard
-        # Box for Topic
-
-
-        def qualification_callback(choice):
-            print("combobox dropdown clicked:", choice)
-
-        combobox_var = Tk.StringVar(value="option 2")
-        combobox = Tk.CTkComboBox(StudyQuiz, values=["A-Level", "GCSE"],
-                                             command=qualification_callback, variable=combobox_var)
-        combobox_var.set("option 2")
-        combobox.place(relx=0.5,rely=0.5,anchor="center")
-    def send_2_creator(self):
-        None
-        # Take the inputs from selection screen
-        # Send them to controller.py to be processed and sent to database
-
-    def retrieval_request(self):
-        # Take the inputs from selection screen
-        # Send them to controller to be sent to database for a request of data 
-        None
-
-class ExistingSetScreen:
-    def __init__(self):
-        super().__init__()
 
     def selection_screen(self):
-        None
-    def retrieval_request(self):
-        None
 
-class QuizScreen:
-    def __init__(self):
-        super().__init__()
+        qualification_types = [
+            "A-LEVEL", "GCSE"
+        ]
 
-    def multiple_choice(self):
-        None
-    def user_input(self):
-        None
+        subjects_by_qualification = {
+            "A-Level": ["Computer Science", "Maths", "Business", "Chemistry"],
+            "GCSE": ["English", "Science", "Geography"]
+        }
+
+        exam_boards_by_qualification_and_subject = {
+            "A-Level": {
+                "Computer Science": ["AQA", "OCR", "Edexcel"],
+                "Maths": ["Edexcel", "AQA", "OCR"],
+                "Business": ["Eduqas", "AQA", "OCR"],
+                "Chemistry": ["AQA", "OCR"]
+            },
+            "GCSE": {
+                "English": ["AQA", "Edexcel", "WJEC"],
+                "Science": ["OCR", "AQA", "Edexcel"],
+                "Geography": ["Edexcel", "OCR", "AQA"]
+            }
+        }
+
+        def qualification_select(choice):
+            print("combobox dropdown clicked:", choice)
+
+        combobox_var = Tk.StringVar(value="Qualification")
+        qualification_combobox = Tk.CTkComboBox(self, values=qualification_types,
+                                              variable=combobox_var, state="readonly")
+        combobox_var.set("GCSE")
+        qualification_combobox.place(relx=0.2,rely=0.5,anchor="center")
+
+        def subject_select(choice):
+            print("combobox dropdown clicked:", choice)
+
+        combobox_var = Tk.StringVar(value="Subject")
+        subject_combobox = Tk.CTkComboBox(self, values=subjects_by_qualification[qualification_combobox.get()],
+                                              variable=combobox_var, state="readonly")
+        combobox_var.set("Science")
+        subject_combobox.place(relx=0.5,rely=0.5,anchor="center")
+
+        def examboard_select(choice):
+            print("combobox dropdown clicked:", choice)
+
+        combobox_var = Tk.StringVar(value="Subject")
+        examboard_combobox = Tk.CTkComboBox(self, values=exam_boards_by_qualification_and_subject[subject_combobox[qualification_combobox.get()].get()],
+                                          variable=combobox_var, state="readonly")
+        combobox_var.set("Subject")
+        examboard_combobox.place(relx=0.8, rely=0.5, anchor="center")
+# Check
+# Check whether coming from "Create New Questions"
+# Box for qualification
+# Box for Subject
+# Box for ExamBoard
+# Box for Topic
+
+# class QuestionCreationScreen(Tk.CTk):
+#
+#     def __init__(self):
+#         super().__init__()
+#
+#
+#
+#     def selection_screen(self,choice):
+#         # Check whether coming from "Create New Questions"
+#         # Box for qualification
+#         # Box for Subject
+#         # Box for ExamBoard
+#         # Box for Topic
+#
+#
+#         def qualification_callback(choice):
+#             print("combobox dropdown clicked:", choice)
+#
+#         combobox_var = Tk.StringVar(value="option 2")
+#         combobox = Tk.CTkComboBox(StudyQuiz, values=["A-Level", "GCSE"],
+#                                              command=qualification_callback, variable=combobox_var)
+#         combobox_var.set("option 2")
+#         combobox.place(relx=0.5,rely=0.5,anchor="center")
+#     def send_2_creator(self):
+#         None
+#         # Take the inputs from selection screen
+#         # Send them to controller.py to be processed and sent to database
+#
+#     def retrieval_request(self):
+#         # Take the inputs from selection screen
+#         # Send them to controller to be sent to database for a request of data
+#         None
+
 
 study_quiz = StudyQuiz()
-question_creation_screen = QuestionCreationScreen()
+# question_creation_screen = QuestionCreationScreen()
 
 study_quiz.mainloop()
+
+##Switch to SBERT !!!
