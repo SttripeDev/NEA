@@ -1,9 +1,15 @@
 
 # **Study Quiz**
 ### A-Level Computer Science NEA 
+##
+### **Student Details**:
+**Name**: George Bagnall
 
+**Centre Number**: ?????
 
-Code and project for my computer Science NEA . Currently a WIP current working functionalities include:
+**Candidate Number**: 2687
+##
+### Progress:
 
 - Cosine similarity between strings
 - Question Generation through ChatGPT
