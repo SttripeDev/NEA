@@ -40,6 +40,9 @@ class ServerManager:
         formatted_data = self.dbm.retrieve_data(data)
         return formatted_data
 
+    def available_topics(self,data):
+        None
+
     def server_listen(self):
         """
         Name: server_listen
@@ -69,4 +72,5 @@ if __name__ == "__main__":
     svr = ServerManager()
     if not db.check_exist():
         db.create_table()
+        db.add_prerequisites()
     svr.server_listen()

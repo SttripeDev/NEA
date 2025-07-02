@@ -198,55 +198,41 @@ class StudyQuiz(Tk.CTk):
 
     def selection_screen(self):
 
-        qualification_types = [
-            "A-LEVEL", "GCSE"
-        ]
-
-        subjects_by_qualification = {
-            "A-Level": ["Computer Science", "Maths", "Business", "Chemistry"],
-            "GCSE": ["English", "Science", "Geography"]
+        all_settings = { #Temporary until database intergration (I just want to get the GUI to work first)
+            "A-Level":{"Computer Science":["OCR","AQA","Edexcel"],
+                        "Business Studies":["Eduqas","Edexcel","AQA"],
+                       "Mathematics":["Edexcel","AQA","OCR"]},
+            "GCSE":{"Business Studies":["Edexcel","AQA"],
+                    "Computer Science":["Edexcel","AQA","OCR"],
+                    "Geography":["Edexcel","AQA","OCR"]}
         }
 
-        exam_boards_by_qualification_and_subject = {
-            "A-Level": {
-                "Computer Science": ["AQA", "OCR", "Edexcel"],
-                "Maths": ["Edexcel", "AQA", "OCR"],
-                "Business": ["Eduqas", "AQA", "OCR"],
-                "Chemistry": ["AQA", "OCR"]
-            },
-            "GCSE": {
-                "English": ["AQA", "Edexcel", "WJEC"],
-                "Science": ["OCR", "AQA", "Edexcel"],
-                "Geography": ["Edexcel", "OCR", "AQA"]
-            }
-        }
+        subject_state = "disabled"
+        subject_values = ["Subject"]
 
-        def qualification_select(choice):
-            print("combobox dropdown clicked:", choice)
+        def qualification_listen(choice):
+            qualification = choice
+            subject_state = "readonly"
+            subject_values = all_settings[qualification]
+            print(qualification)
+
+
 
         combobox_var = Tk.StringVar(value="Qualification")
-        qualification_combobox = Tk.CTkComboBox(self, values=qualification_types,
-                                              variable=combobox_var, state="readonly")
-        combobox_var.set("GCSE")
+        qualification_combobox = Tk.CTkComboBox(self, values=["A-Level","GCSE"],
+                                              variable=combobox_var, state="readonly",command=qualification_listen)
+        combobox_var.set("Qualification")
         qualification_combobox.place(relx=0.2,rely=0.5,anchor="center")
 
-        def subject_select(choice):
-            print("combobox dropdown clicked:", choice)
+
 
         combobox_var = Tk.StringVar(value="Subject")
-        subject_combobox = Tk.CTkComboBox(self, values=subjects_by_qualification[qualification_combobox.get()],
-                                              variable=combobox_var, state="readonly")
-        combobox_var.set("Science")
+        subject_combobox = Tk.CTkComboBox(self, values=subject_values,
+                                              variable=combobox_var, state=subject_state)
+        combobox_var.set("Subject")
         subject_combobox.place(relx=0.5,rely=0.5,anchor="center")
 
-        def examboard_select(choice):
-            print("combobox dropdown clicked:", choice)
 
-        combobox_var = Tk.StringVar(value="Subject")
-        examboard_combobox = Tk.CTkComboBox(self, values=exam_boards_by_qualification_and_subject[subject_combobox[qualification_combobox.get()].get()],
-                                          variable=combobox_var, state="readonly")
-        combobox_var.set("Subject")
-        examboard_combobox.place(relx=0.8, rely=0.5, anchor="center")
 # Check
 # Check whether coming from "Create New Questions"
 # Box for qualification

@@ -137,13 +137,17 @@ class DatabaseManager:
             BoardID INTEGER PRIMARY KEY AUTOINCREMENT ,
             BoardName TEXT)""")
 
-    # def add_prerequisites(self):
-    #     examBoard = ["AQA","EDEXCEL","EDUQAS","OCR"]
-    #     self.cursor.execute("""
-    #             INSERT INTO ExamBoard ()
-    #             VALUES (?)""", )
-    #
-    #     self.conn.commit()
+
+
+    def add_prerequisites(self):
+        examBoard = ["AQA","EDEXCEL","EDUQAS","OCR"]
+        for x in range(len(examBoard)):
+
+            self.cursor.execute("""
+                INSERT INTO ExamBoard (BoardName)
+                VALUES (?)""",[examBoard[x]])
+
+            self.conn.commit()
     def check_exist(self):
         """
         Name: check_exist
@@ -167,3 +171,4 @@ if __name__ == "__main__":
     db = DatabaseManager()
     if not db.check_exist():
         db.create_table()
+        db.add_prerequisites()
