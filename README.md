@@ -21,7 +21,7 @@
 - Main Menu & Settings menu for GUI
 - Comments for functions and files
 - Format of how the program screen are going to work
-- Question Input GUI
-
+- Question Input GUI 
+- Drop Down Menu's for Question Input
 #
-Updated as of 30/06/2025
+Updated as of 07/07/2025
