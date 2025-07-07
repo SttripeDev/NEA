@@ -12,7 +12,7 @@ class DatabaseManager:
     def __init__(self):
         """
         Name: __init__
-        Parameters: self.conn: sqlite3.connect, self.cursor:cursor ,
+        Parameters: None
         Returns: None
         Purpose: Constructor to set the initial values of the connection location and cursor
         """
@@ -25,7 +25,7 @@ class DatabaseManager:
     def add_2_table(self, formatted_dictionary):
         """
         Name: add_2_table
-        Parameters: formatted_dictionary:dictionary, qualification:string, subject:string, exam_board:string, topic:string,question:string,answer:string
+        Parameters: formatted_dictionary:dictionary
         Returns: None
         Purpose: seperates the dictionary into individual strings then commits them to database.
         """
@@ -44,7 +44,7 @@ class DatabaseManager:
     def prepare_data_to_add(self, raw_data):
         """
         Name: preparte_data_to_add
-        Parameters: raw_data:array , filtered_raw_list:array
+        Parameters: raw_data:array
         Returns: None
         Purpose: filters the list of unrequired characters , then loops through list to make it a dictionary to send to add_2_table
         """
@@ -117,7 +117,7 @@ class DatabaseManager:
     def create_table(self):
         """
         Name: create_table
-        Parameters: self.cursor:sqlite3.cursor
+        Parameters: None
         Returns: None
         Purpose: Creates the StudyQuiz Table
         """
@@ -140,6 +140,12 @@ class DatabaseManager:
 
 
     def add_prerequisites(self):
+        """
+        Name: add_prerequisites
+        Parameters: None
+        Returns: None
+        Purpose: Sends each available examboard to the create_table function through looping.
+        """
         examBoard = ["AQA","EDEXCEL","EDUQAS","OCR"]
         for x in range(len(examBoard)):
 

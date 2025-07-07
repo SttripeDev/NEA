@@ -9,7 +9,7 @@ class StudyQuiz(Tk.CTk):
         self.geometry('800x600')
         self.title("Study Quiz")
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
-
+        self.page = None
 
         self.button_font = Tk.CTkFont("Segoe UI", size=14, weight="bold")
         self.title_font = Tk.CTkFont("Segoe UI",size=24,weight="bold")
@@ -31,7 +31,7 @@ class StudyQuiz(Tk.CTk):
         pil_image_home = Image.open(self.script_dir + '\icons\HomeIcon.png')
         self.home_icon = Tk.CTkImage(light_image=pil_image_home, size=(15, 15))
         self.home_button = Tk.CTkButton(
-            self,
+            self.page,
             image=self.home_icon,
             anchor="center",
             text="",
@@ -44,7 +44,7 @@ class StudyQuiz(Tk.CTk):
         pil_image = Image.open(self.script_dir + '\icons\SettingsIcon.png')
         self.settings_icon = Tk.CTkImage(light_image=pil_image, size=(15, 15))
         self.settings_button = Tk.CTkButton(
-            self,
+            self.page,
             image=self.settings_icon,
             anchor="center",
             text="",
@@ -56,29 +56,28 @@ class StudyQuiz(Tk.CTk):
 
         self.main_menu()
 
-
-
         # Previous sets
         # New sets
         # Existing sets
         # settings
         # Credits ig
     def clear_settings(self):
-        self.lightmode_toggle.place_forget()
-        self.darkmode_toggle.place_forget()
-        self.default_toggle.place_forget()
-        self.home_button.place_forget()
         self.bg_frame.place_forget()
         self.main_menu()
     def main_menu(self):
+
+        self.main_menu_frame = Tk.CTkFrame(self,bg_color=self.title_colour)
+        page = self.main_menu_frame
+        self.main_menu_frame.place(relwidth=1,relheight=1)
+
         self.program_title = Tk.CTkLabel(
-            self,
+            self.main_menu_frame,
             text="Study Quiz",
             font=self.big_text_font,
             text_color=self.title_colour)
 
         self.new_set_button = Tk.CTkButton(
-            self,
+            self.main_menu_frame,
             text="Create New Questions",
             command=lambda: self.goto_selection(1),
             font=self.button_font,
@@ -89,7 +88,7 @@ class StudyQuiz(Tk.CTk):
             height=50)
 
         self.existing_set_button = Tk.CTkButton(
-            self,
+            self.main_menu_frame,
             text="Existing Question Sets",
             command=lambda: self.goto_selection(2),
             font=self.button_font,
@@ -123,7 +122,7 @@ class StudyQuiz(Tk.CTk):
         self.bg_frame.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.3, relheight=0.5)
 
         self.settings_title = Tk.CTkLabel(
-            self,
+            self.bg_frame,
             text = "Settings",
             text_color = self.text_colour,
             font= self.title_font,
@@ -150,7 +149,7 @@ class StudyQuiz(Tk.CTk):
                     self.title_colour = "#FFFFFF"
 
         self.lightmode_toggle = Tk.CTkRadioButton(
-            self,
+            self.bg_frame,
             text="Light Mode",
             command=on_mode_change,
             font=self.button_font,
@@ -161,7 +160,7 @@ class StudyQuiz(Tk.CTk):
         )
 
         self.darkmode_toggle = Tk.CTkRadioButton(
-            self,
+            self.bg_frame,
             text="Dark Mode",
             font=self.button_font,
             text_color=self.text_colour,
@@ -172,7 +171,7 @@ class StudyQuiz(Tk.CTk):
         )
 
         self.default_toggle = Tk.CTkRadioButton(
-            self,
+            self.bg_frame,
             text="System Default",
             font=self.button_font,
             text_color=self.text_colour,
@@ -188,10 +187,7 @@ class StudyQuiz(Tk.CTk):
         self.default_toggle.place(relx=0.5, rely=0.6, anchor="center")
 
     def goto_selection(self,choice):
-        self.program_title.place_forget()
-        self.new_set_button.place_forget()
-        self.existing_set_button.place_forget()
-        self.settings_button.place_forget()
+        self.main_menu_frame.forget()
         if choice == 1:
             self.selection_screen()
 
@@ -207,31 +203,94 @@ class StudyQuiz(Tk.CTk):
                     "Geography":["Edexcel","AQA","OCR"]}
         }
 
-        subject_state = "disabled"
-        subject_values = ["Subject"]
+        selection_screen_frame = Tk.CTkFrame(self,bg_color=self.title_colour)
+        selection_screen_frame.place(relwidth=1,relheight=1)
 
         def qualification_listen(choice):
-            qualification = choice
-            subject_state = "readonly"
-            subject_values = all_settings[qualification]
-            print(qualification)
+            subjects = list(all_settings[choice].keys())
+            subject_combobox.configure(values=subjects, state="readonly")
+            subject_var.set("Subject")
+            # Reset exam board
+            examboard_combobox.configure(values=["Exam Board"], state="disabled")
+            examboard_var.set("Exam Board")
+            confirm_button_state()
+        def subject_listen(choice):
+
+            qualification = qualification_var.get()
+            if qualification in all_settings and choice in all_settings[qualification]:
+                boards = all_settings[qualification][choice]
+                examboard_combobox.configure(values=boards, state="readonly")
+                examboard_var.set("Exam Board")
+            else:
+                examboard_combobox.configure(values=["Exam Board"], state="disabled")
+                examboard_var.set("Exam Board")
+            confirm_button_state()
+
+        def confirm_button_state(_=None):
+            board = examboard_var.get()
+            qualification = qualification_var.get()
+            subject = subject_var.get()
+            if board != "Exam Board" and qualification != "Qualification" and subject != "Subject":
+                confirm_button.configure(state="normal")
+            else:
+                confirm_button.configure(state="disabled")
+
+        def goto_topic_select():
+            qualification = qualification_var.get()
+            subject = subject_var.get()
+            examboard = examboard_var.get()
+
+
+        selection_screen_title = Tk.CTkLabel(selection_screen_frame,text="Question Generation",text_color=self.title_colour,font=self.title_font)
+        selection_screen_title.place(relx=0.5, rely=0.3,anchor="center")
+
+        qualification_var = Tk.StringVar(value="Qualification")
+        qualification_combobox = Tk.CTkComboBox(
+            selection_screen_frame,
+            values=list(all_settings.keys()),
+            variable=qualification_var,
+            state="readonly",
+            command=qualification_listen
+        )
+        qualification_combobox.place(relx=0.2, rely=0.5, anchor="center")
+
+        subject_var = Tk.StringVar(value="Subject")
+        subject_combobox = Tk.CTkComboBox(
+            selection_screen_frame,
+            values=["Subject"],
+            variable=subject_var,
+            state="disabled",
+            command=subject_listen
+        )
+        subject_combobox.place(relx=0.5, rely=0.5, anchor="center")
+
+        examboard_var = Tk.StringVar(value="Exam Board")
+        examboard_combobox = Tk.CTkComboBox(
+            selection_screen_frame,
+            values=["Exam Board"],
+            variable=examboard_var,
+            state="disabled",
+            command=confirm_button_state
+        )
+        examboard_combobox.place(relx=0.8, rely=0.5, anchor="center")
+
+        confirm_button = Tk.CTkButton(
+            selection_screen_frame,
+            text="Confirm",
+            font=self.button_font,
+            text_color=self.text_colour,
+            fg_color=self.button_colour,
+            hover_color=self.button_hover_colour,
+            state="disabled",
+            command=goto_topic_select)
+
+        confirm_button.place(relx=0.5,rely=0.7, anchor="center")
 
 
 
-        combobox_var = Tk.StringVar(value="Qualification")
-        qualification_combobox = Tk.CTkComboBox(self, values=["A-Level","GCSE"],
-                                              variable=combobox_var, state="readonly",command=qualification_listen)
-        combobox_var.set("Qualification")
-        qualification_combobox.place(relx=0.2,rely=0.5,anchor="center")
 
-
-
-        combobox_var = Tk.StringVar(value="Subject")
-        subject_combobox = Tk.CTkComboBox(self, values=subject_values,
-                                              variable=combobox_var, state=subject_state)
-        combobox_var.set("Subject")
-        subject_combobox.place(relx=0.5,rely=0.5,anchor="center")
-
+    def topic_select_screen(self):
+        None
 
 # Check
 # Check whether coming from "Create New Questions"
@@ -240,38 +299,7 @@ class StudyQuiz(Tk.CTk):
 # Box for ExamBoard
 # Box for Topic
 
-# class QuestionCreationScreen(Tk.CTk):
-#
-#     def __init__(self):
-#         super().__init__()
-#
-#
-#
-#     def selection_screen(self,choice):
-#         # Check whether coming from "Create New Questions"
-#         # Box for qualification
-#         # Box for Subject
-#         # Box for ExamBoard
-#         # Box for Topic
-#
-#
-#         def qualification_callback(choice):
-#             print("combobox dropdown clicked:", choice)
-#
-#         combobox_var = Tk.StringVar(value="option 2")
-#         combobox = Tk.CTkComboBox(StudyQuiz, values=["A-Level", "GCSE"],
-#                                              command=qualification_callback, variable=combobox_var)
-#         combobox_var.set("option 2")
-#         combobox.place(relx=0.5,rely=0.5,anchor="center")
-#     def send_2_creator(self):
-#         None
-#         # Take the inputs from selection screen
-#         # Send them to controller.py to be processed and sent to database
-#
-#     def retrieval_request(self):
-#         # Take the inputs from selection screen
-#         # Send them to controller to be sent to database for a request of data
-#         None
+
 
 
 study_quiz = StudyQuiz()

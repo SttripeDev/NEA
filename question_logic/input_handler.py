@@ -1,4 +1,10 @@
 class UserInputHandler:
+    """
+        Name: __init__
+        Parameters: self.ai_input_format ,
+        Returns: None
+        Purpose: Defines the default state for ai_input_format
+    """
     def __init__(self):
         self.ai_input_format = {
             "Qualification": "",

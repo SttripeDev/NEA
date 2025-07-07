@@ -15,7 +15,7 @@ class ServerClient:
     def __init__(self):
         """
         Name: __init__
-        Parameters: host: string, port:integer , s:socket
+        Parameters: None
         Returns: None
         Purpose: Constructor to set the initial values of the connection details
         """
@@ -29,7 +29,7 @@ class ServerClient:
 
         """
         Name: database_insertion
-        Parameters: raw_data: array, s:socket
+        Parameters: raw_data: array
         Returns: None
         Purpose: sends raw_data to the database server
         """
@@ -41,7 +41,7 @@ class ServerClient:
     def database_retrieval(self,query):
         """
         Name: database_retrieval
-        Parameters: query: array, s:socket , encode_query:json array
+        Parameters: query: array,
         Returns: formatted_data:array
         Purpose: sends request data from server with query and returns that back to user as formatted_data
         """
@@ -66,7 +66,7 @@ class QuizManager:
     def __init__(self):
         """
             Name: __init__
-            Parameters: user_input_handler:function, question_generation:function , raw_data:string , user_inputs:string
+            Parameters: None
             Returns: None
             Purpose: Constructor that sets the initial value of required variables
         """
@@ -79,7 +79,7 @@ class QuizManager:
     def question_controller(self):
         """
             Name: question_controller
-            Parameters: self.user_input_handler:function, self.user_inputs:array, self.raw_data: array , svr_manager: function
+            Parameters: None
             Returns: self.raw_data
             Purpose: takes user input , sends to have questions created , sends that to database server
         """
@@ -94,7 +94,7 @@ class QuizManager:
     def retrieval_controller(self):
         """
             Name: retrieval_controller
-            Parameters:self.user_input_handler:function, self.user_inputs:array, svr_manager:function
+            Parameters: None
             Returns: self.user_inputs
             Purpose: takes user input , sends the data to database to be processed to recieve specified data.
         """

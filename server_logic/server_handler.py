@@ -11,7 +11,7 @@ class ServerManager:
     def __init__(self):
         """
         Name: __init__
-        Parameters: self.host:string, self.port:51000 , self.s: socket.socket , self.dbm:function
+        Parameters: None
         Returns: None
         Purpose: Constructor that sets the initial value of required variables
         """
@@ -33,7 +33,7 @@ class ServerManager:
     def database_retrieve(self,data):
         """
         Name: database_retrieve
-        Parameters: data:array, formatted_data:array
+        Parameters: data:array
         Returns: formatted_data
         Purpose: sends the data for a request of specific database entries
         """
@@ -41,12 +41,12 @@ class ServerManager:
         return formatted_data
 
     def available_topics(self,data):
-        None
+        None  #to be done once topic select is coded fully :)
 
     def server_listen(self):
         """
         Name: server_listen
-        Parameters: data:json
+        Parameters: None
         Returns: formatted_data
         Purpose: Waits for a user connection and based on the data provided determines if data needs to be sent for insertion or for retrieval
         """
