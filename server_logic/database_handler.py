@@ -11,170 +11,135 @@ class DatabaseManager:
 
     def __init__(self):
         """
-        Name: __init__
-        Parameters: None
-        Returns: None
-        Purpose: Constructor to set the initial values of the connection location and cursor
+        Constructor to set the initial values of the connection location and cursor
         """
         self.conn = sqlite3.connect('database.db')
         self.cursor = self.conn.cursor()
 
+    # -------------------- INSERTIONS --------------------
 
-
-
-    def add_2_table(self, formatted_dictionary):
-        """
-        Name: add_2_table
-        Parameters: formatted_dictionary:dictionary
-        Returns: None
-        Purpose: seperates the dictionary into individual strings then commits them to database.
-        """
-        qualification = formatted_dictionary["Qualification"].upper()
-        subject = formatted_dictionary["Subject"].upper()
-        exam_board = formatted_dictionary["ExamBoard"].upper()
-        topic = formatted_dictionary["Topic"].upper()
-        question = formatted_dictionary["Question"]
-        answer = formatted_dictionary["Answer"]
-
-        self.cursor.execute("""
-        INSERT INTO StudyQuiz (Qualification, Subject, ExamBoard, Topic, Question, Answer)
-        VALUES (?, ?, ?, ?, ?, ?)""", [qualification, subject, exam_board, topic, question, answer])
-
+    def add_exam_board(self, board_name):
+        self.cursor.execute("INSERT INTO ExamBoards (BoardName) VALUES (?)", (board_name,))
         self.conn.commit()
-    def prepare_data_to_add(self, raw_data):
-        """
-        Name: preparte_data_to_add
-        Parameters: raw_data:array
-        Returns: None
-        Purpose: filters the list of unrequired characters , then loops through list to make it a dictionary to send to add_2_table
-        """
-        raw_list = raw_data.split("\n")
 
-        filtered_raw_list = [item for item in raw_list if item not in ("```", "", "json", "```json")]
+    def add_qualification(self, qual_name):
+        self.cursor.execute("INSERT INTO Qualifications (QualificationName) VALUES (?)", (qual_name,))
+        self.conn.commit()
 
-        for x in range(len(filtered_raw_list)):
-            data = filtered_raw_list[x]
-            raw_dictionary = data.split(' = ')[1]
+    def add_subject(self, qualification_id, exam_board_id, subject_name):
+        self.cursor.execute("""
+            INSERT INTO Subjects (QualificationID, ExamBoardID, SubjectName)
+            VALUES (?, ?, ?)
+        """, (qualification_id, exam_board_id, subject_name))
+        self.conn.commit()
 
-            formatted_dictionary = json.loads(raw_dictionary)
+    def add_topic(self, subject_id, topic_name):
+        self.cursor.execute("""
+            INSERT INTO Topics (SubjectID, TopicName)
+            VALUES (?, ?)
+        """, (subject_id, topic_name))
+        self.conn.commit()
 
-            self.add_2_table(formatted_dictionary)
+    def add_question(self, topic_id, question, answer):
+        self.cursor.execute("""
+            INSERT INTO StudyQuiz (TopicID, Question, Answer)
+            VALUES (?, ?, ?)
+        """, (topic_id, question, answer))
+        self.conn.commit()
 
-    def format_retrieved_data(self,data,amount):
-        """
-        Name: format_retrieved_data
-        Parameters: data:array, amount:integer
-        Returns: None
-        Purpose: format the data from retrieval to return to client .
-        """
+    # -------------------- RETRIEVAL --------------------
 
-        id_list = []
-        for x in range(len(data)):
-            id_list.insert(x,data[x][0])
+    def get_exam_boards(self):
+        self.cursor.execute("SELECT * FROM ExamBoards")
+        return self.cursor.fetchall()
+
+    def get_qualifications(self):
+        self.cursor.execute("SELECT * FROM Qualifications")
+        return self.cursor.fetchall()
+
+    def get_subjects(self):
+        self.cursor.execute("SELECT * FROM Subjects")
+        return self.cursor.fetchall()
+
+    def get_topics_by_subject(self, subject_id):
+        self.cursor.execute("SELECT * FROM Topics WHERE SubjectID=?", (subject_id,))
+        return self.cursor.fetchall()
+
+    def get_questions_by_topic(self, topic_id, amount):
+        self.cursor.execute("""
+            SELECT QuestionID, Question, Answer FROM StudyQuiz WHERE TopicID = ?
+        """, (topic_id,))
+        data = self.cursor.fetchall()
+        return self.format_retrieved_data(data, amount)
+
+    # -------------------- HELPERS --------------------
+
+    def format_retrieved_data(self, data, amount):
+        id_list = [row[0] for row in data]
         question_list = []
-        q_and_a = []
-        for x in range(len(data)):
+        for _ in range(min(amount, len(id_list))):
             random_question_id = random.choice(id_list)
             id_list.remove(random_question_id)
-            for y in range(len(data)):
-                if random_question_id == data[y][0]:
-                    question = data[y][1]
-                    answer = data[y][2]
-                    q_and_a = [question,answer]
-                    question_list.insert(x, q_and_a)
-                else:
-                    continue
-
+            for row in data:
+                if row[0] == random_question_id:
+                    question_list.append([row[1], row[2]])
+                    break
         return question_list
 
     def retrieve_data(self, query_input):
-        """
-        Name: retrieved_data
-        Parameters: query_input: array
-        Returns: formatted
-        Purpose: decodes the data and seperated it into seperate variables to send a database request.
-        """
         query_input = json.loads(query_input)
-        qualification = query_input["Qualification"].upper()
-        subject = query_input["Subject"].upper()
-        examboard = query_input["ExamBoard"].upper()
-        topic = query_input["Topic"].upper()
+        topic_id = query_input["TopicID"]
         amount = query_input["Amount"]
 
-        query = """
-                SELECT QuestionID, Question, Answer FROM StudyQuiz
-                WHERE Qualification = ? AND Subject = ? AND Topic = ?  AND ExamBoard = ?  """
-
-        self.cursor.execute(query,(qualification,subject,topic,examboard))
-        output = self.cursor.fetchall()
-
-        formatted = self.format_retrieved_data(output,amount)
-        formatted = json.dumps(formatted)
-
+        output = self.get_questions_by_topic(topic_id, amount)
+        formatted = json.dumps(output)
         return formatted
 
+    # -------------------- TABLE CREATION --------------------
 
-    def create_table(self):
-        """
-        Name: create_table
-        Parameters: None
-        Returns: None
-        Purpose: Creates the StudyQuiz Table
-        """
+    def create_tables(self):
         self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS StudyQuiz (
-            QuestionID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Qualification TEXT,
-            Subject TEXT,
-            ExamBoard TEXT,
-            Topic TEXT,
-            Question TEXT,
-            Answer TEXT
+        CREATE TABLE IF NOT EXISTS ExamBoards (
+            BoardID INTEGER PRIMARY KEY AUTOINCREMENT,
+            BoardName TEXT
         )""")
 
         self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS ExamBoard (
-            BoardID INTEGER PRIMARY KEY AUTOINCREMENT ,
-            BoardName TEXT)""")
+        CREATE TABLE IF NOT EXISTS Qualifications (
+            QualificationID INTEGER PRIMARY KEY AUTOINCREMENT,
+            QualificationName TEXT
+        )""")
 
-
-
-    def add_prerequisites(self):
-        """
-        Name: add_prerequisites
-        Parameters: None
-        Returns: None
-        Purpose: Sends each available examboard to the create_table function through looping.
-        """
-        examBoard = ["AQA","EDEXCEL","EDUQAS","OCR"]
-        for x in range(len(examBoard)):
-
-            self.cursor.execute("""
-                INSERT INTO ExamBoard (BoardName)
-                VALUES (?)""",[examBoard[x]])
-
-            self.conn.commit()
-    def check_exist(self):
-        """
-        Name: check_exist
-        Parameters: table_name:string
-        Returns: results
-        Purpose: Checks it 'StudyQuiz' exists
-        """
-        table_name = 'StudyQuiz'
         self.cursor.execute("""
-            SELECT name
-            FROM sqlite_master
-            WHERE type='table'
-            AND name=?;
+        CREATE TABLE IF NOT EXISTS Subjects (
+            SubjectID INTEGER PRIMARY KEY AUTOINCREMENT,
+            QualificationID INTEGER,
+            ExamBoardID INTEGER,
+            SubjectName TEXT,
+            FOREIGN KEY(QualificationID) REFERENCES Qualifications(QualificationID),
+            FOREIGN KEY(ExamBoardID) REFERENCES ExamBoards(BoardID)
+        )""")
+
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Topics (
+            TopicID INTEGER PRIMARY KEY AUTOINCREMENT,
+            SubjectID INTEGER,
+            TopicName TEXT,
+            FOREIGN KEY(SubjectID) REFERENCES Subjects(SubjectID)
+        )""")
+
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS StudyQuiz (
+            QuestionID INTEGER PRIMARY KEY AUTOINCREMENT,
+            TopicID INTEGER,
+            Question TEXT,
+            Answer TEXT,
+            FOREIGN KEY(TopicID) REFERENCES Topics(TopicID)
+        )""")
+
+    def check_exist(self, table_name="StudyQuiz"):
+        self.cursor.execute("""
+            SELECT name FROM sqlite_master WHERE type='table' AND name=?;
         """, (table_name,))
         result = self.cursor.fetchone()
         return result is not None
-
-
-
-if __name__ == "__main__":
-    db = DatabaseManager()
-    if not db.check_exist():
-        db.create_table()
-        db.add_prerequisites()
