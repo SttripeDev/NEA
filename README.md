@@ -9,19 +9,17 @@
 
 **Candidate Number**: 2687
 ##
-### Progress:
+### What it does:
+- GUI built in Tkinter
+- Server set available subjects
+- Normalised Database
+- Networked Database
+- Question Generation using OpenAI
+- Topic List Generation using OpenAI
+- SBERT for marking typed answers
+- Cosine Similarity in partnership with SBERT
+- Resit Questions you got wrong
+- Multiple Choice + Typed input
 
-- Cosine similarity between strings
-- Question Generation through ChatGPT
-- Formatting and sorting data for database server insertion
-- Retrieval from database server
-- The database server itself and its handling and processing of data
-- Following OOP with clear seperation with classes for each task
-- Communication between files
-- Main Menu & Settings menu for GUI
-- Comments for functions and files
-- Format of how the program screen are going to work
-- Question Input GUI 
-- Drop Down Menu's for Question Input
 #
-Updated as of 07/07/2025
+Updated as of 07/09/2025
