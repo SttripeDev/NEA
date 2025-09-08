@@ -17,7 +17,8 @@
 - Question Generation using OpenAI
 - Topic List Generation using OpenAI
 - SBERT for marking typed answers
-- Cosine Similarity in partnership with SBERT
+- Cosine Similarity (manual coded)
+  - Uses SBERT to convert to vector 
 - Resit Questions you got wrong
 - Multiple Choice + Typed input
 
