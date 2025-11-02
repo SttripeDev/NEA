@@ -21,6 +21,8 @@
   - Uses SBERT to convert to vector 
 - Resit Questions you got wrong
 - Multiple Choice + Typed input
+- Threaded Server to allow multiple Inputs
 
 #
 Updated as of 08/09/2025
+
