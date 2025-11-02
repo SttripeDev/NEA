@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import simpledialog , messagebox
 import socket
 import json
 import random
@@ -8,6 +9,16 @@ from marking_system import MarkingSystem
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 51000
 
+
+root = tk.Tk()
+root.withdraw()
+server_ip = simpledialog.askstring(
+    "Server IP",
+    "Enter the Server IP (leave blank for localhost 127.0.0.1):"
+)
+SERVER_HOST = server_ip.strip() if server_ip and server_ip.strip() else "127.0.0.1"
+SERVER_PORT = 51000
+root.destroy()
 
 def request_server_data(payload):
 

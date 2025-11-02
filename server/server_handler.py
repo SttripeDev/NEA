@@ -1,8 +1,8 @@
 import json
 import socket
+import threading
 from database_handler import DatabaseManager
-from ai_handler import TopicGenerator
-from ai_handler import QuestionGeneration
+from ai_handler import TopicGenerator, QuestionGeneration
 
 
 class ServerManager:
@@ -39,19 +39,18 @@ class ServerManager:
         else:
             return json.dumps([])
 
-    # Question Generation Stuff
+    # Question Generation
     def handle_generate_questions(self, request):
-
         qualification = request.get("qualification")
         subject = request.get("subject")
         exam_board = request.get("exam_board")
         topic = request.get("topic")
         amount = request.get("amount", 25)
 
-        # Convert names to IDs
         qualification_id = next((q[0] for q in self.dbm.get_qualifications() if q[1] == qualification), None)
         if qualification_id is None:
             return json.dumps({"status": "error", "message": "Qualification not found"})
+
         subjects = [s for s in self.dbm.get_subjects() if s[1] == qualification_id and s[3] == subject]
         if not subjects:
             return json.dumps({"status": "error", "message": "Subject not found"})
@@ -67,9 +66,7 @@ class ServerManager:
             return json.dumps({"status": "error", "message": "Topic not found"})
         topic_id = topics[0][0]
 
-
         raw_output = self.q_gen.generator([subject, qualification, exam_board, topic, amount])
-
 
         if isinstance(raw_output, str):
             lines = raw_output.splitlines()
@@ -96,16 +93,13 @@ class ServerManager:
         return json.dumps({"status": "success", "message": f"{amount} questions added to database"})
 
     def handle_get_questions(self, request):
-
         topic_id = request.get("topic_id")
         if not topic_id:
             return json.dumps({"status": "error", "message": "Missing topic_id"})
 
         try:
-
             rows = self.dbm.get_questions_by_topic(topic_id)
             questions = [{"id": r[0], "question": r[1], "answer": r[2]} for r in rows]
-
             return json.dumps({"status": "success", "questions": questions})
         except Exception as e:
             return json.dumps({"status": "error", "message": str(e)})
@@ -114,40 +108,54 @@ class ServerManager:
         sets = self.dbm.get_existing_sets()
         return json.dumps(sets)
 
-    # Server Listening
-    def server_listen(self):
-        print("Server is listening on port", self.port)
-        self.s.listen(5)
-        while True:
-            connection, address = self.s.accept()
-            print("New connection from", address)
-            data = connection.recv(16384).decode("utf-8")
-            try:
-                request_json = json.loads(data)
-            except json.JSONDecodeError:
-                request_json = None
+    def handle_client(self, connection, address):
+        print(f"New connection from {address}")
+        try:
+            while True:
+                data = connection.recv(16384)
+                if not data:
+                    break
 
-            if request_json:
-                if request_json.get("type") in ["qualifications", "exam_boards", "subjects", "topics"]:
+                try:
+                    request_json = json.loads(data.decode("utf-8"))
+                except json.JSONDecodeError:
+                    connection.send(json.dumps({"status": "error", "message": "Invalid JSON"}).encode())
+                    continue
+
+                request_type = request_json.get("type")
+                if request_type in ["qualifications", "exam_boards", "subjects", "topics"]:
                     result = self.handle_dropdown_request(request_json)
-                elif request_json.get("type") == "generate_questions":
-                    result = self.handle_generate_questions(request_json)
-                elif request_json.get("type") == "get_questions":
+                elif request_type == "generate_questions":
+                    request_type = self.handle_generate_questions(request_json)
+                elif request_type == "get_questions":
                     result = self.handle_get_questions(request_json)
-                elif request_json.get("type") == "existing_sets":
+                elif request_type == "existing_sets":
                     result = self.handle_existing_sets(request_json)
-
                 else:
                     result = json.dumps({"status": "error", "message": "Unknown request type"})
-            else:
-                result = json.dumps({"status": "error", "message": "Invalid JSON received"})
 
-            connection.send(result.encode())
+                connection.send(result.encode())
+
+        except Exception as e:
+            print(f"Error handling client {address}: {e}")
+        finally:
             connection.close()
+            print(f"Connection with {address} closed.")
+
+    def server_listen(self):
+        print(f"Server is listening on {self.host}:{self.port}")
+
+        self.s.listen(5)
+
+        while True:
+            connection, address = self.s.accept()
+            client_thread = threading.Thread(target=self.handle_client, args=(connection, address))
+            client_thread.daemon = True  # allows clean shutdown
+            client_thread.start()
+            print(f"Active connections: {threading.active_count() - 1}")
 
     # Setup Mode
     def setup_mode(self):
-
         print("\nSetup Mode Selected")
         self.dbm.create_tables()
 
@@ -225,15 +233,14 @@ class ServerManager:
                         break
                     self.dbm.add_topic(subject_id, topic_name)
 
-            # Always add "ALL" topic
             self.dbm.add_topic(subject_id, "ALL")
 
 
 if __name__ == "__main__":
     svr = ServerManager()
-    print("Main Menu: " ,'\n')
+    print("Main Menu:\n")
     print("1. Run Server")
-    print("2. Setup Database" ,'\n')
+    print("2. Setup Database\n")
     choice = input("Select option: ").strip()
 
     if choice == "1":
