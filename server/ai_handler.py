@@ -2,22 +2,28 @@ import os
 import json
 from openai import OpenAI
 from dotenv import load_dotenv
-
-class TopicGenerator:
+''' 
+Name: TopicGenerator
+Purpose: Contains the ChatGPT api calls for topic list generation
+'''
+class TopicGeneration:
+    '''
+    Name: __init__
+    Purpose: Constructor for topic generation containing apikey setting
+    '''
     def __init__(self):
-        # Always load the root .env (one level up from server/)
         dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
         load_dotenv(dotenv_path)
 
-        # Use OpenAI with API key from env
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+    ''' 
+    Name: generate_topics 
+    Parameters: qualification,subject,exam_board
+    Returns: topics:array 
+    Purpose: API request to generate topic list using chatGPT
+    '''
     def generate_topics(self, qualification, subject, exam_board):
-        """
-        Uses ChatGPT to suggest topics for a given Subject + Qualification + Exam Board.
-        Returns a Python list of topics.
-        """
-
         user_input = f"[{subject}, {qualification}, {exam_board}]"
 
         completion = self.client.chat.completions.create(
@@ -53,21 +59,27 @@ class TopicGenerator:
             print("⚠ ChatGPT returned unexpected format:")
             print(raw_output)
             return []
-
+''' 
+Name: QuestionGeneration
+Purpose: Contains the ChatGPT api calls for question generation
+'''
 class QuestionGeneration:
+    '''
+    Name: __init__
+    Purpose: Constructor for topic generation containing apikey setting
+    '''
     def __init__(self):
-        # Always load root .env
         dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
         load_dotenv(dotenv_path)
 
-        # Initialize OpenAI client
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-    def generator(self, user_inputs):
-        """
-        user_inputs must be in this structure:
-        [Subject, Qualification, Exam Board, Topic, Amount of Questions]
-        """
+    ''' 
+    Name: generate_questions 
+    Parameters: user_inputs
+    Returns: questions:JSON 
+    Purpose: API request to generate questions using chatGPT
+    '''
+    def generate_questions(self, user_inputs):
         subject, qualification, exam_board, topic, amount = user_inputs
 
         completion = self.client.chat.completions.create(
@@ -102,10 +114,9 @@ Generate exactly the requested number of Q&A pairs.
 
         raw_output = completion.choices[0].message.content.strip()
 
-        # Parse GPT output as JSON
         try:
             questions = json.loads(raw_output)
         except json.JSONDecodeError:
-            raise ValueError("⚠️ GPT did not return valid JSON")
+            raise ValueError("GPT did not return valid JSON")
 
         return questions

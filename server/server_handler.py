@@ -2,21 +2,32 @@ import json
 import socket
 import threading
 from database_handler import DatabaseManager
-from ai_handler import TopicGenerator, QuestionGeneration
+from ai_handler import TopicGeneration, QuestionGeneration
 
-
+''' 
+Name: ServerManager
+Purpose: Contains all that allows the server to run
+'''
 class ServerManager:
-
+    '''
+    Name: __init__
+    Purpose: Constructor for server containing default ports and ip aswell as setting imported code (DatabaseManager ,TopicGeneration & QuestionGeneration)
+    '''
     def __init__(self):
         self.host = "127.0.0.1"
         self.port = 51000
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.host, self.port))
         self.dbm = DatabaseManager()
-        self.topic_gen = TopicGenerator()
+        self.topic_gen = TopicGeneration()
         self.q_gen = QuestionGeneration()
 
-    # Dropdown menu requests
+    ''' 
+    Name: handle_dropdown_request 
+    Parameters: request: dictionary
+    Returns: json.dumps:JSON 
+    Purpose: Dropdown menu requests
+    '''
     def handle_dropdown_request(self, request):
         rtype = request.get("type")
         if rtype == "qualifications":
@@ -38,8 +49,12 @@ class ServerManager:
             return json.dumps([{"id": t[0], "name": t[1]} for t in data])
         else:
             return json.dumps([])
-
-    # Question Generation
+    ''' 
+    Name: handle_generate_questions
+    Parameters: request: dictionary
+    Returns: json.dumps:JSON 
+    Purpose: Question Generation parsing data to ai_handler
+    '''
     def handle_generate_questions(self, request):
         qualification = request.get("qualification")
         subject = request.get("subject")
@@ -66,7 +81,7 @@ class ServerManager:
             return json.dumps({"status": "error", "message": "Topic not found"})
         topic_id = topics[0][0]
 
-        raw_output = self.q_gen.generator([subject, qualification, exam_board, topic, amount])
+        raw_output = self.q_gen.generate_questions([subject, qualification, exam_board, topic, amount])
 
         if isinstance(raw_output, str):
             lines = raw_output.splitlines()
@@ -91,7 +106,12 @@ class ServerManager:
                 print(f"Error parsing line: {line}, {e}")
 
         return json.dumps({"status": "success", "message": f"{amount} questions added to database"})
-
+    ''' 
+    Name: handle_get_questions
+    Parameters: request: dictionary
+    Returns: json.dumps:JSON 
+    Purpose: get questions based on topic ID
+    '''
     def handle_get_questions(self, request):
         topic_id = request.get("topic_id")
         if not topic_id:
@@ -103,11 +123,21 @@ class ServerManager:
             return json.dumps({"status": "success", "questions": questions})
         except Exception as e:
             return json.dumps({"status": "error", "message": str(e)})
-
+    ''' 
+    Name: handle_existing_sets
+    Parameters: request: dictionary
+    Returns: json.dumps:JSON 
+    Purpose: Grab all existing sets from db
+    '''
     def handle_existing_sets(self, request):
         sets = self.dbm.get_existing_sets()
         return json.dumps(sets)
-
+    ''' 
+    Name: handle_client
+    Parameters: connection:socket, address:tuple
+    Returns: json.dumps:JSON 
+    Purpose: direct client to specific functions based on request_type
+    '''
     def handle_client(self, connection, address):
         print(f"New connection from {address}")
         try:
@@ -126,7 +156,7 @@ class ServerManager:
                 if request_type in ["qualifications", "exam_boards", "subjects", "topics"]:
                     result = self.handle_dropdown_request(request_json)
                 elif request_type == "generate_questions":
-                    request_type = self.handle_generate_questions(request_json)
+                    result = self.handle_generate_questions(request_json)
                 elif request_type == "get_questions":
                     result = self.handle_get_questions(request_json)
                 elif request_type == "existing_sets":
@@ -141,7 +171,12 @@ class ServerManager:
         finally:
             connection.close()
             print(f"Connection with {address} closed.")
-
+    ''' 
+    Name: server_listen
+    Parameters: None
+    Returns: None
+    Purpose: lister function waiting for users to connect to server
+    '''
     def server_listen(self):
         print(f"Server is listening on {self.host}:{self.port}")
 
@@ -150,11 +185,16 @@ class ServerManager:
         while True:
             connection, address = self.s.accept()
             client_thread = threading.Thread(target=self.handle_client, args=(connection, address))
-            client_thread.daemon = True  # allows clean shutdown
+            client_thread.daemon = True
             client_thread.start()
             print(f"Active connections: {threading.active_count() - 1}")
 
-    # Setup Mode
+    ''' 
+    Name: setup_mode
+    Parameters: None
+    Returns: None
+    Purpose: Allows server user to setup the database with data
+    '''
     def setup_mode(self):
         print("\nSetup Mode Selected")
         self.dbm.create_tables()

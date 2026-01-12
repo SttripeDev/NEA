@@ -1,16 +1,41 @@
 import sqlite3
 import os
-
+''' 
+Name: DatabaseManager
+Purpose: Contains code relating to controlling the database
+'''
 class DatabaseManager:
+    '''
+    Name: __init__
+    Purpose: Constructor for location of database.db file
+    '''
     def __init__(self, db_name="database.db"):
         self.db_name = db_name
 
+    ''' 
+    Name: connect
+    Parameters: None
+    Returns: None
+    Purpose: connect to database file found at self.db_name
+    '''
     def connect(self):
         return sqlite3.connect(self.db_name)
 
+    ''' 
+    Name: check_exist
+    Parameters: None
+    Returns: None
+    Purpose: Check if there is a database to be found at the path
+    '''
     def check_exist(self):
         return os.path.exists(self.db_name)
 
+    ''' 
+    Name: create_tables
+    Parameters: None
+    Returns: None
+    Purpose: Create all necessary tables mirroring server structure.
+    '''
     def create_tables(self):
         conn = self.connect()
         c = conn.cursor()
@@ -69,21 +94,37 @@ class DatabaseManager:
         conn.commit()
         conn.close()
 
-    # Add Data
+# Add Data
+    ''' 
+    Name: add_exam_board
+    Parameters: exam_board_name: string
+    Returns: None
+    Purpose: Add exam board , ignores if it already exist
+    '''
     def add_exam_board(self, exam_board_name):
         conn = self.connect()
         c = conn.cursor()
         c.execute("INSERT OR IGNORE INTO ExamBoards (ExamBoardName) VALUES (?)", (exam_board_name,))
         conn.commit()
         conn.close()
-
+    ''' 
+    Name: add_qualification
+    Parameters: qualification_name: string
+    Returns: None
+    Purpose: Add qualification, ignores if it already exist
+    '''
     def add_qualification(self, qualification_name):
         conn = self.connect()
         c = conn.cursor()
         c.execute("INSERT OR IGNORE INTO Qualifications (QualificationName) VALUES (?)", (qualification_name,))
         conn.commit()
         conn.close()
-
+    ''' 
+    Name: add_subject
+    Parameters: qualification_id:integer , exam_board_id:integer , subject_name:string
+    Returns: None
+    Purpose: Add subject, ignores if it already exist
+    '''
     def add_subject(self, qualification_id, exam_board_id, subject_name):
         conn = self.connect()
         c = conn.cursor()
@@ -93,14 +134,24 @@ class DatabaseManager:
         """, (qualification_id, exam_board_id, subject_name))
         conn.commit()
         conn.close()
-
+    ''' 
+    Name: add_topic
+    Parameters: subject_id:integer , topic_name: string
+    Returns: None
+    Purpose: Add topic, ignores if it already exist
+    '''
     def add_topic(self, subject_id, topic_name):
         conn = self.connect()
         c = conn.cursor()
         c.execute("INSERT OR IGNORE INTO Topics (SubjectID, TopicName) VALUES (?, ?)", (subject_id, topic_name))
         conn.commit()
         conn.close()
-
+    ''' 
+    Name: add_question
+    Parameters: topic_id:integer , question: string, answer:string
+    Returns: None
+    Purpose: Add Question and Answer to database based upon topic id
+    '''
     def add_question(self, topic_id, question, answer):
         conn = self.connect()
         c = conn.cursor()
@@ -110,9 +161,15 @@ class DatabaseManager:
         """, (topic_id, question.strip(), answer.strip()))
         conn.commit()
         conn.close()
-        print(f"✅ Question inserted into TopicID {topic_id}")
+        print(f"Question inserted into TopicID {topic_id}")
 
-    # Retrieval Methods
+# Retrieval Methods
+    ''' 
+    Name: get_exam_boards
+    Parameters: None
+    Returns: rows : tuple
+    Purpose: Get all exam boards.
+    '''
     def get_exam_boards(self):
         conn = self.connect()
         c = conn.cursor()
@@ -120,7 +177,12 @@ class DatabaseManager:
         rows = c.fetchall()
         conn.close()
         return rows
-
+    ''' 
+    Name: get_qualifcations
+    Parameters: None
+    Returns: rows : tuple
+    Purpose: Get all Qualifications.
+    '''
     def get_qualifications(self):
         conn = self.connect()
         c = conn.cursor()
@@ -128,7 +190,12 @@ class DatabaseManager:
         rows = c.fetchall()
         conn.close()
         return rows
-
+    ''' 
+    Name: get_subjects
+    Parameters: None
+    Returns: rows : tuple
+    Purpose: Get all subjects.
+    '''
     def get_subjects(self):
         conn = self.connect()
         c = conn.cursor()
@@ -136,7 +203,12 @@ class DatabaseManager:
         rows = c.fetchall()
         conn.close()
         return rows
-
+    ''' 
+    Name: get_subject_id
+    Parameters: subject_name:string, qualification_id:integer, exam_board_id:integer
+    Returns: row[0] : integer
+    Purpose: Get subject ID by name and parent IDs.
+    '''
     def get_subject_id(self, subject_name, qualification_id, exam_board_id):
         conn = self.connect()
         c = conn.cursor()
@@ -147,7 +219,12 @@ class DatabaseManager:
         row = c.fetchone()
         conn.close()
         return row[0] if row else None
-
+    ''' 
+    Name: get_topics_by_hierarchy
+    Parameters: subject_name:string, qualification_id:integer, exam_board_id:integer
+    Returns: rows:tuple
+    Purpose: Get topics for a specific qualification/subject/exam board combination.
+    '''
     def get_topics_by_hierarchy(self, qualification_id, subject_name, exam_board_id):
         conn = self.connect()
         c = conn.cursor()
@@ -160,7 +237,12 @@ class DatabaseManager:
         rows = c.fetchall()
         conn.close()
         return rows
-
+    ''' 
+    Name: get_existing_sets
+    Parameters: None
+    Returns: result:array
+    Purpose: Gets all existing sets within the database
+    '''
     def get_existing_sets(self):
 
         conn = self.connect()
@@ -187,7 +269,13 @@ class DatabaseManager:
             })
         return result
 
-    # Retrieve ID methods
+# Retrieve ID methods
+    ''' 
+    Name: get_qualification_id
+    Parameters: qualification_name
+    Returns: row[0] : integer
+    Purpose: Get qualification ID by name.
+    '''
     def get_qualification_id(self, qualification_name):
         conn = self.connect()
         c = conn.cursor()
@@ -195,7 +283,12 @@ class DatabaseManager:
         row = c.fetchone()
         conn.close()
         return row[0] if row else None
-
+    ''' 
+    Name: get_exam_board_id
+    Parameters: exam_board_name
+    Returns: row[0] : integer
+    Purpose: Get exam board ID by name.
+    '''
     def get_exam_board_id(self, exam_board_name):
         conn = self.connect()
         c = conn.cursor()
@@ -203,7 +296,12 @@ class DatabaseManager:
         row = c.fetchone()
         conn.close()
         return row[0] if row else None
-
+    ''' 
+    Name: get_topic_id
+    Parameters: subject_id:integer, topic_name:string
+    Returns: row[0] : integer
+    Purpose: Get topic ID by subject ID and topic name.
+    '''
     def get_topic_id(self, subject_id, topic_name):
         conn = self.connect()
         c = conn.cursor()
@@ -211,7 +309,12 @@ class DatabaseManager:
         row = c.fetchone()
         conn.close()
         return row[0] if row else None
-
+    ''' 
+    Name: get_questions_by_topic
+    Parameters: topic_id:integer 
+    Returns: rows:tuple
+    Purpose: Get all questions for a specific topic.
+    '''
     def get_questions_by_topic(self, topic_id):
         conn = self.connect()
         c = conn.cursor()
