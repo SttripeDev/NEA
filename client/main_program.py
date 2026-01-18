@@ -294,6 +294,9 @@ class StudyQuiz(tk.Tk):
         confirm_button = tk.Button(frame, text="Confirm", font=self.button_font, state="disabled")
         confirm_button.place(relx=0.5, rely=0.75, anchor="center")
 
+        back_button = tk.Button(frame, text="Back to Menu", font=self.button_font,command=self.main_menu)
+        back_button.place(relx=0.5, rely=0.9, anchor="center")
+
         # Load datasets from logic layer
         if choice == 1:
             self.data_set, self.qualifications, self.exam_boards = self.logic.load_parameter_sets()
@@ -393,6 +396,7 @@ class StudyQuiz(tk.Tk):
                     messagebox.showinfo("Info", "No questions found.")
 
         confirm_button.config(command=confirm_selection)
+
 
 #Question Screens
     '''
